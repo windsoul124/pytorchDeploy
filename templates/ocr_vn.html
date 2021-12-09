@@ -44,15 +44,15 @@
             success: function (data) {
                 console.log('success')
                 console.log(data)
-                $('#preview_photo').attr("src", data.previewpath)
-                $('#result_photo').attr("src", data.resultpath)
-                var preview = '<img id="preview_photo" src="' + data.previewpath + '" width="250px" height="250px">'
-                var result = '<img id="result_photo" src="' + data.resultpath + '" width="250px" height="250px">'
+                {#$('#preview_photo').attr("src", data.previewpath)#}
+                {#$('#result_photo').attr("src", data.resultpath)#}
+                {#var preview = '<img id="preview_photo" src="' + data.previewpath + '" width="250px" height="250px">'#}
+                {#var result = '<img id="result_photo" src="' + data.resultpath + '" width="250px" height="250px">'#}
                 var idnumber = '<p>id:' + data.result.idnumber + '</p>'
                 var birth = '<p>birth:' + data.result.birth + '</p>'
                 var expire = '<p>expire:' + data.result.expire + '</p>'
-                $('#preview').append(preview)
-                $('#result').append(result)
+                {#$('#preview').append(preview)#}
+                {#$('#result').append(result)#}
                 $('#result').append(idnumber)
                 $('#result').append(birth)
                 $('#result').append(expire)

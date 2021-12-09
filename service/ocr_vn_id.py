@@ -142,7 +142,7 @@ def detect():
                 # imgpath = 'static/images/ocr_detect/{}{}'.format(random.randint(1000, 9999), file_name)
                 # cv2.imwrite(imgpath, pred_mask1)
                 return {"code": '200',
-                        "previewpath": 'static/images/ocr_detect/' + file_name,
+                        # "previewpath": 'static/images/ocr_detect/' + file_name,
                         # "resultpath": imgpath,
                         "message": "上传成功",
                         'result': {
