@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pytorch OCR</title>
+    <script src="/static/js/jquery-3.3.1.min.js"></script>
+</head>
+<body>
+<img src="{{ url_for('static', filename = 'images/album.jpg') }}" alt="" width="150px" height="150px">
+<h1>PYTORCH OCR</h1>
+<div>
+    <h2>1.OCR</h2>
+    <a href="/ocr_detect">Click this</a>
+</div>
+<div>
+    <h2>2.Face comparsion</h2>
+    <a href="/face_comparison">Click this</a>
+</div>
+<div>
+    <h2>3.Face recognition</h2>
+    <a href="/face_recognition">Click this</a>
+</div>
+<form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" name="file">
+    <input type="button" value="上传" id="upFileBtn">
+</form>
+<div id="preview">
+</div>
+<div id="result">
+</div>
+<script>
+
+    $('#upFileBtn').click(function () {
+        {#alert('success')#}
+    })
+    $('#upFileBtn').click(function () {
+        var formFile = new FormData($('#uploadForm')[0])
+        $.ajax({
+            url: "/ocr_detect",
+            type: "POST",
+            data: formFile,
+            processData: false,
+            contentType: false,
+            success: function (data) {
+                console.log('success')
+                console.log(data)
+                $('#preview_photo').attr("src", data.previewpath)
+                $('#result_photo').attr("src", data.resultpath)
+                var preview = '<img id="preview_photo" src="' + data.previewpath + '" width="250px" height="250px">'
+                var result = '<img id="result_photo" src="' + data.resultpath + '" width="250px" height="250px">'
+                var idnumber = '<p>id:' + data.result.idnumber + '</p>'
+                var birth = '<p>birth:' + data.result.birth + '</p>'
+                var expire = '<p>expire:' + data.result.expire + '</p>'
+                $('#preview').append(preview)
+                $('#result').append(result)
+                $('#result').append(idnumber)
+                $('#result').append(birth)
+                $('#result').append(expire)
+
+            }
+        })
+    })
+</script>
+</body>
+</html>

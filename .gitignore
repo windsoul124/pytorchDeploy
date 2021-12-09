@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+face_comparison/
+face_recognition/
+ocr_detect/

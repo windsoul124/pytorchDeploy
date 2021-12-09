@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Face_comparision</title>
+    <script src="/static/js/jquery-3.3.1.min.js"></script>
+</head>
+<body>
+<img src="{{ url_for('static', filename = 'images/album.jpg') }}" alt="" width="150px" height="150px">
+<h1>PYTORCH FACE</h1>
+<div>
+    <h2>1.OCR</h2>
+    <a href="/ocr_detect">Click this</a>
+</div>
+<div>
+    <h2>2.Face comparsion</h2>
+    <a href="/face_comparison">Click this</a>
+</div>
+<div>
+    <h2>3.Face recognition</h2>
+    <a href="/face_recognition">Click this</a>
+</div>
+
+
+<form id="uploadForm" enctype="multipart/form-data" >
+    <input type="file" name="file_first">
+    <input type="file" name="file_second">
+    <input type="button" value="上传" id="upFileBtn">
+</form>
+<div id="preview">
+</div>
+<div id="result">
+</div>
+<script>
+
+    $('#upFileBtn').click(function (){
+        {#alert('success')#}
+    })
+    $('#upFileBtn').click(function () {
+        var formFile = new FormData($('#uploadForm')[0])
+        $.ajax({
+            url:"/face_comparison",
+            type:"POST",
+            data:formFile,
+            processData:false,
+            contentType:false,
+            success: function (data) {
+                console.log('success')
+                console.log(data)
+                var similarity = '<h2>Similarity:' + data.result.similarity + '</h2>'
+                $('#result').append(similarity)
+            }
+        })
+    })
+</script>
+</body>
+</html>
