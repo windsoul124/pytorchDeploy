@@ -139,11 +139,11 @@ def detect():
                     img = cv2.polylines(pred_mask, [box], True, (0, 0, 255), 2)
                 cv2.drawContours(pred_mask, contours, -1, (100, 100, 100))
                 # 检测后的图片保存（看上线需求）
-                imgpath = 'static/images/ocr_detect/{}{}'.format(random.randint(1000, 9999), file_name)
-                cv2.imwrite(imgpath, pred_mask1)
+                # imgpath = 'static/images/ocr_detect/{}{}'.format(random.randint(1000, 9999), file_name)
+                # cv2.imwrite(imgpath, pred_mask1)
                 return {"code": '200',
                         "previewpath": 'static/images/ocr_detect/' + file_name,
-                        "resultpath": imgpath,
+                        # "resultpath": imgpath,
                         "message": "上传成功",
                         'result': {
                             'idnumber': pred_idnumber.strip(),
