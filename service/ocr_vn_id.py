@@ -9,6 +9,7 @@ from static.torch_model.toolof_ocrdetect import *
 切换CPU与GPU 需注释
 """
 # 注册蓝图
+
 ocr_vn = Blueprint("ocr_vn", __name__)
 # 设置允许上传的文件格式
 ALLOW_EXTENSIONS = ['png', 'jpg', 'jpeg']

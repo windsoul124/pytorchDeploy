@@ -252,19 +252,16 @@ def get_cut_img1(img, boxs):
 
         line_angle0 = math.atan2(new_angle_line0[1], new_angle_line0[0])
         line_angle = math.atan2(new_angle_line[1], new_angle_line[0])
+
         line_angle0 = line_angle0 * 180 / math.pi
         line_angle = line_angle * 180 / math.pi
 
-        print('角度值', line_angle0, line_angle)
+        print('角度值', line_angle)
         img0 = img
         img2 = img
         img7 = img
 
-        routline = -line_angle - 90
-        routline0 = -line_angle0 - 90
-
-        if routline0 - 360 > 0:
-            routline0 = routline
+        routline = -(270 - line_angle)
 
         ap = img[208:218, 208:218]
         end_img0 = ap
@@ -311,8 +308,7 @@ def get_cut_img1(img, boxs):
                 elif x22 - x11 < y22 - y11:
                     end_img0 = img_new0[x11 - 1:x22 + 1, y11:y22]
 
-                # cv2.imshow('*-*-*-*-*-',end_img0)
-                # cv2.waitKey(0)
+
             elif boxs[i][0] == 2:
                 min_x = min(boxs[2][1][0][0], boxs[2][1][1][0], boxs[2][1][2][0], boxs[2][1][3][0])
                 max_x = max(boxs[2][1][0][0], boxs[2][1][1][0], boxs[2][1][2][0], boxs[2][1][3][0])
@@ -352,9 +348,6 @@ def get_cut_img1(img, boxs):
                 elif x20 - x10 < y20 - y10:
                     end_img2 = img_new2[x10 - 1:x20 + 1, y10:y20]
 
-                # cv2.imshow('*-*-*-*-*-', img_new2)
-                # cv2.imshow('*****', end_img2)
-                # cv2.waitKey(0)
 
             elif boxs[i][0] == 7:
 
