@@ -5,6 +5,7 @@ import random
 import os
 import numpy
 from static.torch_model.toolof_ocrdetect import *
+import time
 """
 切换CPU与GPU 需注释
 """
@@ -80,6 +81,7 @@ def detect():
     """
     if request.method == 'POST':
         # 获取post过来的文件名称，从name=file参数中获取
+        start_time = time.time()
         file = request.files['file']
         # 检测文件格式
         if file and allowed_file(file.filename):
@@ -139,6 +141,9 @@ def detect():
                     box = cv2.approxPolyDP(cont, epsilon, True)
                     img = cv2.polylines(pred_mask, [box], True, (0, 0, 255), 2)
                 cv2.drawContours(pred_mask, contours, -1, (100, 100, 100))
+                end_time = time.time()
+                cost = end_time-start_time
+                print("TIME:", cost * 1000)
                 # 检测后的图片保存（看上线需求）
                 # imgpath = 'static/images/ocr_detect/{}{}'.format(random.randint(1000, 9999), file_name)
                 # cv2.imwrite(imgpath, pred_mask1)
