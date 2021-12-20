@@ -312,4 +312,4 @@ def face_comparsion_define():
     # else:
     #     return {"code": '503',
     #             "message": "仅支持post方法", "result": {}}
-    return render_template('face_comparison.html')
+    # return render_template('face_comparison.html')

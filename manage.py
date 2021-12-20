@@ -8,13 +8,13 @@ app.register_blueprint(ocr_vn_id.ocr_vn)
 # 人脸比对
 app.register_blueprint(face_comparison.face_comparison_blueprint)
 # 人脸识别
-app.register_blueprint(face_recognition.face_recognition_blueprint)
+# app.register_blueprint(face_recognition.face_recognition_blueprint)
 
 
 # 首页
-@app.route('/')
-def index():
-    return render_template('index.html')
+# @app.route('/')
+# def index():
+#     return render_template('index.html')
 
 
 # 处理中文编码

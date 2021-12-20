@@ -8,6 +8,7 @@ from torchvision import transforms
 
 def behind_img(path):
     img0 = cv2.imread(path)
+    # img0 = path
 
     if img0.shape[2] == 1:
         print('image is False')

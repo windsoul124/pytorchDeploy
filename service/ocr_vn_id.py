@@ -6,11 +6,14 @@ import os
 import numpy
 from static.torch_model.toolof_ocrdetect import *
 import time
+import base64
+
 """
 切换CPU与GPU 需注释
+GPU服务器还应是生产服务器选择的方案
+模型加载放在接口设置之前
 """
 # 注册蓝图
-
 ocr_vn = Blueprint("ocr_vn", __name__)
 # 设置允许上传的文件格式
 ALLOW_EXTENSIONS = ['png', 'jpg', 'jpeg']
@@ -20,16 +23,19 @@ UPLOAD_FOLDER_OCR_VN = './static/images/ocr_detect'
 pth_data_1 = './static/torch_model/ocr_detect_model.pth'
 pth_data_2 = './static/torch_model/ocr_read_model.pth'
 # 模型实例化
-model_1 = U2NETP().cpu()
-model_2 = U2NETP().cpu()
+# model_1 = U2NETP().cpu()
+# model_2 = U2NETP().cpu()
+model_1 = U2NETP()
+model_2 = U2NETP()
 # 模型初始化
 model_1.eval()
 model_2.eval()
-# model_1.cuda()  # 切换GPU1
-model_1.load_state_dict(torch.load(pth_data_1, map_location=torch.device('cpu')))  # 将参数加载到模型里(CPU)
-model_2.load_state_dict(torch.load(pth_data_2, map_location=torch.device('cpu')))  # 将参数加载到模型里(CPU)
-# model_1.load_state_dict(torch.load(pth_data_1))  # 切换GPU2
-# model_2.load_state_dict(torch.load(pth_data_2))  # 切换GPU3
+model_1.cuda()
+model_2.cuda()
+# model_1.load_state_dict(torch.load(pth_data_1, map_location=torch.device('cpu')))  # 将参数加载到模型里(CPU)
+# model_2.load_state_dict(torch.load(pth_data_2, map_location=torch.device('cpu')))  # 将参数加载到模型里(CPU)
+model_1.load_state_dict(torch.load(pth_data_1))
+model_2.load_state_dict(torch.load(pth_data_2))
 
 
 def after_request(resp):
@@ -70,6 +76,14 @@ def contours_get(img0):
     return img0, contours
 
 
+def base64_cv2(base64_str):
+    imgString = base64.b64decode(base64_str)
+    nparr = np.fromstring(imgString, np.uint8)
+    image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    print(image.shape)
+    return image
+
+
 # 以下是接口设置
 # OCR检测(POST请求)
 @ocr_vn.route("/ocr_detect", methods=['POST', 'GET'])
@@ -82,6 +96,13 @@ def detect():
     if request.method == 'POST':
         # 获取post过来的文件名称，从name=file参数中获取
         start_time = time.time()
+        # 从这开始接受base64
+        # resParm = request.data
+        # resParm = str(resParm, encoding="utf-8")
+        # print(resParm)
+        # resParm = eval(resParm)
+        # base = resParm.get('base64')
+        # image_test = base64_cv2(base)
         file = request.files['file']
         # 检测文件格式
         if file and allowed_file(file.filename):
@@ -91,11 +112,10 @@ def detect():
                 # 保存图片
                 file.save(os.path.join(UPLOAD_FOLDER_OCR_VN, file_name))
                 img_orgin_cv, pil_img = behind_img(os.path.join(UPLOAD_FOLDER_OCR_VN, file_name))
-                # img_orgin_pil = Image.open(os.path.join(UPLOAD_FOLDER, file_name))
-                # img_orgin_cv = cv2.imread(os.path.join(UPLOAD_FOLDER, file_name))
+                # img_orgin_cv, pil_img = behind_img(image_test) # base64传入
                 inputs_test = tf(pil_img, 416, 416)
-                # if torch.cuda.is_available():
-                #     inputs_test = inputs_test.cuda()
+                if torch.cuda.is_available():
+                    inputs_test = inputs_test.cuda()
                 # 将数据传如模型 得到7个tensor张量（1，1，416，416）
                 pred0, pred1, pred2, pred3, pred4, pred5, pred6 = model_1(inputs_test)
                 # 将张量反算成（3，416，416）
@@ -108,17 +128,18 @@ def detect():
                 # cv2.imshow('pred',pred_mask)
                 # cv2.waitKey(0)
                 boxs = mask2value(pred_mask)  # 得到外接矩形boxs
-
                 img_0, img_2, img_7, img_x = get_cut_img1(img_orgin_cv, boxs)  # 得到想得到的数字切片
                 img_0 = img_trans(img_0, (120, 120))
+                img_0 = img_0.cuda()
                 pred_idnumber = model_2(img_0)
                 img_2 = img_trans(img_2, (120, 120))
+                img_2 = img_2.cuda()
                 pred_birth = model_2(img_2)
                 img_7 = img_trans(img_7, (120, 120))
+                img_7 = img_7.cuda()
                 pred_expire = model_2(img_7)
                 # 身份证号码
                 pred_idnumber = mask_read2value(ten2cv(pred_idnumber))
-                # print(len(str(pred_idnumber).strip()))
                 print(pred_idnumber)
                 # 生日日期
                 pred_birth = mask_read2value(ten2cv(pred_birth))
@@ -126,24 +147,25 @@ def detect():
                 # 到期时间
                 pred_expire = mask_read2value(ten2cv(pred_expire))
                 print(pred_expire)
+                # 之后更新新的识别的再加入这里
                 # 三个值检测不到视为识别失败
                 if pred_idnumber.strip() == '' and pred_expire.strip() == '' and pred_birth.strip() == '':
                     return {"code": '500',
                             'message': '识别失败',
                             'result': {}}
-                # 保存检测图片
-                pred_mask1, contours = contours_get(pred_mask)
-                pred_mask = pred_mask1.copy()
-                for cont in contours:
-                    # 取轮廓长度的1%为epsilon
-                    epsilon = 0.005 * cv2.arcLength(cont, True)
-                    # 预测多边形
-                    box = cv2.approxPolyDP(cont, epsilon, True)
-                    img = cv2.polylines(pred_mask, [box], True, (0, 0, 255), 2)
-                cv2.drawContours(pred_mask, contours, -1, (100, 100, 100))
                 end_time = time.time()
-                cost = end_time-start_time
+                cost = end_time - start_time
                 print("TIME:", cost * 1000)
+                # 保存检测图片
+                # pred_mask1, contours = contours_get(pred_mask)
+                # pred_mask = pred_mask1.copy()
+                # for cont in contours:
+                #     # 取轮廓长度的1%为epsilon
+                #     epsilon = 0.005 * cv2.arcLength(cont, True)
+                #     # 预测多边形
+                #     box = cv2.approxPolyDP(cont, epsilon, True)
+                #     img = cv2.polylines(pred_mask, [box], True, (0, 0, 255), 2)
+                # cv2.drawContours(pred_mask, contours, -1, (100, 100, 100))
                 # 检测后的图片保存（看上线需求）
                 # imgpath = 'static/images/ocr_detect/{}{}'.format(random.randint(1000, 9999), file_name)
                 # cv2.imwrite(imgpath, pred_mask1)
@@ -170,8 +192,8 @@ def detect():
                     "message": "格式错误，仅支持jpg、png、jpeg格式文件",
                     "result": {}
                     }
-    # 上线时注释
-    # else:
-    #     return {"code": '503',
-    #             "message": "仅支持post方法", "result": {}}
-    return render_template('ocr_vn.html')
+        # 上线时注释
+    else:
+        return {"code": '503',
+                "message": "仅支持post方法", "result": {}}
+        # return render_template('ocr_vn.html')

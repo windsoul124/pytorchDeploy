@@ -7,7 +7,7 @@ face_recognition_blueprint = Blueprint("face_recognition", __name__)
 
 @face_recognition_blueprint.route('/face_recognition')
 def index():
-    return render_template('face_recognition.html')
-
+    # return render_template('face_recognition.html')
+    pass
 
 
